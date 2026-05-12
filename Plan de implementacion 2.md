@@ -156,7 +156,7 @@ Aquí tienes el prompt definitivo para que lo copies y pegues:
 
 ---
 
-### 🚀 Prompt para Antigravity: App "Lavandería Pro" (Full Riverpod & SQL)
+### Prompt para Antigravity: App "Lavandería Pro" (Full Riverpod & SQL)
 
 **System Context:**
 
