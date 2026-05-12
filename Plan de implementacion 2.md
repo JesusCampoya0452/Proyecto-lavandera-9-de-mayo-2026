@@ -1,6 +1,4 @@
-Este es el **Plan Maestro de Implementación de Ingeniería de Software: Versión Omni-Canal Ultra-Extendida**.
-
-He expandido cada sección para cubrir no solo el "qué" y el "cómo", sino el "porqué" de cada decisión arquitectónica, centrándome exclusivamente en el ecosistema **Firebase** y el diseño de la **Plataforma Web Administrativa**, eliminando cualquier rastro de SQL y manteniendo una estructura de carpetas industrial.
+Este es el **Plan Maestro de Implementación de Ingeniería de Software: Versión Omni-Canal Ultra-Extendida**, actualizado para integrar el esquema de base de datos detallado, manteniendo la compatibilidad con **Flutter (iOS, Android, Web)** y la gestión de estado mediante **Provider**.
 
 ---
 
@@ -11,7 +9,7 @@ La aplicación no se comporta como una web tradicional de "petición y respuesta
 ### Capas de Lógica en la Nube:
 
 * **Capa de Identidad (Auth):** Manejo de tokens JWT automáticos por Firebase.
-* **Capa de Persistencia (Firestore):** Base de datos documental con consistencia eventual.
+* **Capa de Persistencia (Firestore/NoSQL & Mapping Relacional):** Base de datos con consistencia eventual y estructura de soporte para reportes.
 * **Capa de Cómputo (Cloud Functions):** Procesamiento de lógica pesada fuera del dispositivo para ahorrar batería y datos al cliente.
 * **Capa de Activos (Storage):** Almacenamiento optimizado para imágenes de alta resolución de prendas para control de calidad.
 
@@ -19,11 +17,11 @@ La aplicación no se comporta como una web tradicional de "petición y respuesta
 
 ## 📂 2. Estructura de Carpetas: "Feature-First Industrial"
 
-Esta organización garantiza que el código sea modular. Si el módulo de "Pagos" falla, el resto de la app permanece intacta.
+Esta organización garantiza que el código sea modular y compatible con el patrón **ChangeNotifier** de **Provider**.
 
 ```text
 lib/
-├── main.dart                 # Configuración de Firebase Core y Crashlytics
+├── main.dart                 # Configuración de Firebase, MultiProvider y Crashlytics
 ├── app.dart                  # Root Widget, Configuración de Temas y GoRouter
 │
 ├── src/
@@ -37,7 +35,7 @@ lib/
 │   │   ├── auth/             # Registro, Login, Recuperación y Perfil
 │   │   │   ├── data/         # Repositorios que envuelven FirebaseAuth
 │   │   │   ├── domain/       # Entidades AppUser y sus validaciones
-│   │   │   └── presentation/ # UI de acceso y onboarding
+│   │   │   └── presentation/ # UI de acceso y onboarding (Provider Consumer)
 │   │   │
 │   │   ├── laundry_catalog/  # Catálogo de servicios y precios
 │   │   │   ├── data/         # Data Sources para leer Firestore
@@ -58,7 +56,10 @@ lib/
 │   │       └── presentation/ # Dashboard, Kanban y Reportería
 │   │
 │   ├── routing/              # NAVEGACIÓN DECLARATIVA (GoRouter)
-│   └── shared/               # PROVIDERS GLOBALES (Riverpod Notifiers)
+│   └── providers/            # GESTIÓN DE ESTADO (Provider: ChangeNotifiers)
+│       ├── cart_provider.dart
+│       ├── auth_provider.dart
+│       └── order_status_provider.dart
 │
 └── assets/                   # Iconografía, Imágenes de marca y animaciones Lottie
 
@@ -66,27 +67,54 @@ lib/
 
 ---
 
-## 📊 3. Arquitectura de Datos (Firestore NoSQL Schema)
+## 📊 3. Arquitectura de Datos Detallada (Estructura de Tablas)
 
-Diseño de colecciones optimizado para **baja latencia**.
+Se integran las entidades del sistema para garantizar la integridad referencial y el control total de la operación.
 
-### A. Colección: `users`
+### A. Entidades de Usuario y Personal
 
-Cada documento es un perfil de cliente único.
+* **CLIENTE:** Personas que solicitan el servicio.
+* *Atributos:* `id_cliente` (PK), `nombre`, `telefono` (IDX), `email`, `direccion`, `fecha_registro`, `activo`.
 
-* **Fields:** `uid`, `displayName`, `email`, `photoUrl`, `phone`, `createdAt`.
-* **Sub-colección: `addresses**`: Lista de lugares de recogida (casa, oficina, gimnasio).
-* **Sub-colección: `payment_methods**`: Tokens seguros de tarjetas (vía Stripe/MercadoPago).
 
-### B. Colección: `services` (El Inventario)
+* **EMPLEADO:** Personal de la lavandería.
+* *Atributos:* `id_empleado` (PK), `id_sucursal` (FK), `nombre`, `puesto`, `telefono`, `fecha_alta`, `activo`.
 
-* **Fields:** `serviceName`, `price`, `description`, `category` (Ropa de cama, Vestir, Delicado), `imageIcon`.
 
-### C. Colección: `orders` (El Motor Transaccional)
+* **SUCURSAL:** Locales de la empresa.
+* *Atributos:* `id_sucursal` (PK), `nombre`, `direccion`, `telefono`, `activa`.
 
-* **Fields:** `orderId`, `customerId`, `totalAmount`, `currentStatus`, `itemsList` (Map Array).
-* **History (Array de Maps):** `[ {status: 'recogido', time: timestamp}, {status: 'lavando', time: timestamp} ]`.
-* **Logistics:** `pickupSlot` (Día/Hora), `deliverySlot`.
+
+
+### B. Entidades de Operación y Catálogo
+
+* **SERVICIO:** Tipos de proceso ofrecidos.
+* *Atributos:* `id_servicio` (PK), `nombre`, `descripcion`, `precio_base` (DECIMAL), `tiempo_estimado_hrs`, `activo`.
+
+
+* **ORDEN:** Pedido central del sistema.
+* *Atributos:* `id_orden` (PK), `id_cliente` (FK), `id_empleado` (FK), `id_sucursal` (FK), `fecha_ingreso`, `fecha_entrega_est`, `fecha_entrega_real`, `estado` (IDX: recibido/en_proceso/listo/entregado), `notas`.
+
+
+* **PRENDA_ORDEN:** Detalle de artículos por orden.
+* *Atributos:* `id_detalle` (PK), `id_orden` (FK), `id_servicio` (FK), `id_insumo` (FK - opcional), `descripcion_prenda`, `color`, `cantidad`, `precio_unitario`, `observaciones`.
+
+
+
+### C. Entidades Financieras e Inventario
+
+* **PAGO:** Registro financiero de la orden.
+* *Atributos:* `id_pago` (PK), `id_orden` (FK), `monto_total`, `descuento`, `monto_pagado`, `metodo_pago` (ENUM: efectivo/tarjeta/transferencia), `fecha_pago`.
+
+
+* **INSUMO:** Productos e inventario.
+* *Atributos:* `id_insumo` (PK), `id_proveedor` (FK), `nombre`, `unidad`, `stock_actual`, `stock_minimo`, `costo_unitario`.
+
+
+* **PROVEEDOR:** Empresas suministradoras.
+* *Atributos:* `id_proveedor` (PK), `nombre`, `contacto`, `telefono`, `email`.
+
+
 
 ---
 
@@ -109,24 +137,15 @@ Es la pantalla donde ocurre la magia. Los pedidos se ven como tarjetas en column
 * **Columna 4: Listas para Entrega (Verde):** Ropa limpia esperando salir.
 * **Columna 5: Finalizadas (Blanco):** Historial del día.
 
-### C. Detalles de Tarjeta (UI):
-
-Cada tarjeta en el panel web muestra:
-
-* ID del pedido en negrita.
-* Contador de tiempo (¿Cuánto lleva en este estado?).
-* Avatar del cliente.
-* Etiqueta de "Urgente" si el cliente pagó por servicio express.
-
 ---
 
-## 🎨 5. Diseño de la App Móvil (Interfaz Cliente)
+## 📱 5. Despliegue Multiplataforma (iOS, Android, Web)
 
-### Experiencia "Fresh & Clean":
+El código se compila desde una única base **Flutter**, adaptándose a cada entorno:
 
-* **Home:** Un saludo amigable seguido de una tarjeta de "Estado de tu pedido actual" con una barra de progreso animada.
-* **Catálogo:** Cards con bordes redondeados y sombras suaves. Al tocar una prenda, una pequeña animación de "añadido" vuela hacia el carrito.
-* **Seguimiento:** Una vista de línea de tiempo (Timeline) donde cada paso tiene un icono: una bolsa para 'recogido', burbujas para 'lavando', una plancha para 'planchado'.
+* **iOS:** Implementación de gestos nativos y compatibilidad con Apple Pay.
+* **Android:** Notificaciones push de alta prioridad para cambios de estado de lavado.
+* **Web Administrativa:** Layout responsivo tipo desktop que permite el arrastre de tarjetas (drag & drop) en el panel Kanban y gestión de inventario de **INSUMOS**.
 
 ---
 
@@ -142,67 +161,8 @@ Para proteger los datos sin un servidor tradicional, usamos las **Firestore Secu
 
 ## 🚀 7. Resumen de Flujo para Antigravity
 
-1. **Backend:** Configurar Firebase y desplegar el esquema de colecciones detallado.
-2. **App Móvil:** Crear el flujo de compra (Catálogo -> Carrito -> Pago) y la vista de tracking reactiva.
-3. **Panel Web:** Construir el Dashboard Kanban que permita al staff cambiar el estado de las órdenes con un click.
-4. **Integración:** Asegurar que cuando el staff mueva una tarjeta en la Web, el cliente reciba una notificación push y su App cambie de estado visualmente al instante.
-
----
-
-## 🚀 8. Prompt
-Perfecto. He ajustado el prompt para **Antigravity** eliminando cualquier rastro de `Provider` y sustituyéndolo por un enfoque moderno basado en **Riverpod** con generación de código (`Riverpod Generator`), que es el estándar actual para proyectos de alto rendimiento en Flutter.
-
-Aquí tienes el prompt definitivo para que lo copies y pegues:
-
----
-
-### Prompt para Antigravity: App "Lavandería Pro" (Full Riverpod & SQL)
-
-**System Context:**
-
-> "Actúa como un Arquitecto de Software experto en Flutter y DBA. El objetivo es generar el andamiaje técnico de una aplicación de lavandería profesional que utilice Riverpod para el estado y una estructura relacional para los datos."
-
-**Prompt Principal:**
-
-"Genera la estructura técnica y visual para una aplicación de lavandería en **Flutter** eliminando por completo el uso de Provider y utilizando **Riverpod (con riverpod_generator)** como única solución de gestión de estado.
-
-**1. Arquitectura de Datos (Enfoque Relacional):**
-Diseña un esquema de base de datos SQL normalizado y escalable que incluya las siguientes entidades con integridad referencial:
-
-* **CLIENTE:** (id, nombre, email, direccion_entrega).
-* **SERVICIO:** (id, nombre, precio_decimal, categoria_enum).
-* **ORDEN:** (id, id_cliente, fecha_creacion, estado_actual_enum).
-* **DETALLE_ORDEN:** (id, id_orden, id_servicio, cantidad, subtotal_decimal).
-* **PAGO:** (id, id_orden, monto_decimal, metodo_pago_enum).
-*(Genera el script SQL DDL compatible con MySQL/PostgreSQL usando tipos DECIMAL para montos monetarios).*
-
-**2. Gestión de Estado con Riverpod:**
-
-* Crea un `AsyncNotifierProvider` para gestionar el estado de las órdenes en tiempo real.
-* Implementa un `StreamProvider` para escuchar los cambios de estado de la lavandería desde Firebase Firestore.
-* Crea un `StateProvider` para el manejo del carrito de servicios antes de confirmar el pedido.
-* Asegura que no exista ninguna dependencia de 'provider' en el archivo `pubspec.yaml` ni en los archivos `.dart`.
-
-**3. Interfaz de Usuario (UI):**
-
-* **Diseño:** Estilo minimalista con enfoque en accesibilidad.
-* **Componentes:** Un 'ServiceSelector' con cards modernas, un 'OrderStepper' para visualizar el progreso del lavado y un 'PaymentSummary'.
-* **Navegación:** Configura **GoRouter** para manejar rutas protegidas (Login/Dashboard).
-
-**4. Entregables de Código:**
-
-* Modelos de datos inmutables usando la sintaxis de **Freezed**.
-* Estructura de carpetas bajo el patrón **Feature-First** (auth, services, orders, payment).
-* Lógica de validación para formularios de recogida y entrega."
-
----
-
-### 💡 Por qué este prompt es mejor:
-
-1. **Eliminación estricta de Provider:** Al especificar `riverpod_generator`, obligas a la IA a usar la sintaxis más moderna de Riverpod (clases con la anotación `@riverpod`), evitando patrones obsoletos.
-2. **Precisión Financiera:** Al insistir en `DECIMAL` y `monto_decimal`, evitas que Antigravity use `double`, lo que previene errores de precisión en los cobros de la lavandería.
-3. **Clean Architecture:** Al pedir el patrón **Feature-First**, el código que genere será fácil de navegar y escalar si decides añadir funciones como "lavado de alfombras" o "suscripciones mensuales" después.
-
----
-
-Este plan extendido proporciona una visión de 360 grados de la infraestructura y el diseño. ¿Deseas que profundice en el diseño de los **reportes de ingresos** para el dueño o en el flujo de **notificaciones push**?
+1. **Backend:** Configurar Firebase y desplegar el esquema de tablas detallado (Clientes, Órdenes, Pagos, Insumos, etc.).
+2. **Estado Global:** Inyectar los `ChangeNotifiers` (Provider) en el root de la app para que la información fluya entre pantallas.
+3. **App Móvil (iOS/Android):** Crear el flujo de compra y la vista de tracking reactiva basada en la tabla `ORDEN`.
+4. **Panel Web:** Construir el Dashboard Kanban y los módulos de gestión de `EMPLEADOS` y `PROVEEDORES`.
+5. **Integración:** Asegurar que cuando el staff mueva una tarjeta en la Web, el `OrderProvider` notifique a la App móvil para actualizar la UI del cliente al instante.
