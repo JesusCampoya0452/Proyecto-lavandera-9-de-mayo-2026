@@ -149,7 +149,7 @@ Para proteger los datos sin un servidor tradicional, usamos las **Firestore Secu
 
 ---
 
-## 🚀 7. Resumen de Flujo para Antigravity
+## 🚀 8. Prompt
 Perfecto. He ajustado el prompt para **Antigravity** eliminando cualquier rastro de `Provider` y sustituyéndolo por un enfoque moderno basado en **Riverpod** con generación de código (`Riverpod Generator`), que es el estándar actual para proyectos de alto rendimiento en Flutter.
 
 Aquí tienes el prompt definitivo para que lo copies y pegues:
