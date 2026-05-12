@@ -1,141 +1,141 @@
-Perfecto, eliminamos **Provider** por completo. Para una aplicación de este tipo, la recomendación técnica estándar en el ecosistema actual de Flutter es utilizar **Riverpod** o **Bloc/Cubit**, ya que ofrecen un manejo de estado más robusto, seguro y fácil de testear.
-
-Aquí tienes el plan de implementación actualizado y extendido, enfocado exclusivamente en **Lavandería** y optimizado para una arquitectura moderna.
+Este es el **Plan Maestro de Implementación Definitivo y Ultra-Extendido**, diseñado para ser la fuente de verdad absoluta del proyecto. Está estructurado con un nivel de detalle técnico profundo para que **Antigravity** genere la lógica, la base de datos y la interfaz de tu App de Lavandería con precisión quirúrgica.
 
 ---
 
-# 📋 Plan de Implementación Extenso: App "Lavandería Pro" (Flutter + Firebase)
+# 🚀 Plan Maestro de Implementación: "Lavandería Pro" (Estructura de Alto Nivel)
 
-## 1. 🛠️ Ecosistema y Stack Tecnológico
-
-| Categoría | Herramienta | Propósito |
-| --- | --- | --- |
-| **Framework** | Flutter SDK | Desarrollo multiplataforma. |
-| **Estado** | **Riverpod** | Gestión de estado reactiva, segura y sin contexto. |
-| **Backend** | Firebase | Auth, Firestore (NoSQL) y Cloud Functions. |
-| **Base de Datos** | SQL (MySQL/SQLite) | Reportes financieros y estructura relacional detallada. |
-| **Navegación** | GoRouter | Enrutamiento declarativo y protección de rutas. |
+Este documento detalla la ingeniería detrás de la aplicación, eliminando por completo **Provider** y consolidando un ecosistema basado en **Riverpod**, **Clean Architecture** y **Relational Data Integrity**.
 
 ---
 
-## 2. 🏛️ Arquitectura de Base de Datos (DBA Design)
+## 1. 🏗️ Arquitectura de Software: Clean Architecture + Feature-First
 
-El diseño relacional es fundamental para la integridad de los pedidos. Evitaremos el uso de tipos de datos imprecisos para los costos.
+Para que la aplicación sea escalable y mantenible, dividiremos el código en **Features**. Cada funcionalidad es un módulo independiente que contiene tres capas bien definidas:
 
-### 2.1. Entidades y Atributos
+### A. Capa de Presentación (Presentation Layer)
 
-* **CLIENTE:** Datos de perfil y geolocalización para entregas.
-* **SERVICIO:** Catálogo de servicios (Lavado, Secado, Planchado, Tintorería).
-* **ORDEN:** La cabecera del pedido que rastrea el ciclo de vida.
-* **DETALLE_ORDEN:** Desglose de piezas y servicios aplicados a cada una.
-* **PAGO:** Registro de transacciones financieras.
+* **Widgets:** Componentes visuales puros y atómicos.
+* **Controllers (Riverpod Notifiers):** Aquí reside la lógica de la UI. Escuchan los cambios del usuario y se comunican con la capa de dominio. No contienen lógica de negocio compleja, solo gestionan el estado de la pantalla.
 
-### 2.2. Tablas del Sistema
+### B. Capa de Dominio (Domain Layer)
 
-| Tabla | Atributos | Tipo de Dato |
-| --- | --- | --- |
-| **CLIENTE** | `id_cliente (PK)`, `nombre`, `email`, `telefono` | INT, VARCHAR, VARCHAR, VARCHAR |
-| **SERVICIO** | `id_servicio (PK)`, `nombre`, `precio_unitario` | INT, VARCHAR, DECIMAL(10,2) |
-| **ORDEN** | `id_orden (PK)`, `id_cliente (FK)`, `estado`, `total` | INT, INT, ENUM, DECIMAL(10,2) |
-| **PAGO** | `id_pago (PK)`, `id_orden (FK)`, `monto`, `metodo` | INT, INT, DECIMAL(10,2), ENUM |
+* **Entities:** Objetos de negocio puros (ej. `LaundryOrder`, `LaundryService`). Son inmutables.
+* **Repositories (Interfaces):** Contratos que definen qué puede hacer la app, sin decir cómo se hace.
+* **Use Cases:** Acciones específicas (ej. `CalculateTotalWithTax`, `ValidateCoupon`).
 
----
+### C. Capa de Datos (Data Layer)
 
-## 3. 🚀 Script SQL de Estructura (`bd_lavanderia.sql`)
-
-Este script asegura que la base de datos sea relacionalmente íntegra.
-
-```sql
-CREATE DATABASE IF NOT EXISTS lavanderia_pro;
-USE lavanderia_pro;
-
--- Servicios disponibles
-CREATE TABLE servicios (
-    id_servicio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    precio_unitario DECIMAL(10,2) NOT NULL,
-    categoria ENUM('Lavado', 'Tintorería', 'Planchado', 'Otros')
-) ENGINE=InnoDB;
-
--- Órdenes de trabajo
-CREATE TABLE ordenes (
-    id_orden INT AUTO_INCREMENT PRIMARY KEY,
-    id_cliente INT NOT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('Pendiente', 'Lavando', 'Listo para Entrega', 'Entregado') DEFAULT 'Pendiente',
-    total_pagar DECIMAL(10,2) NOT NULL,
-    INDEX (id_cliente)
-) ENGINE=InnoDB;
-
--- Detalle por prenda/servicio
-CREATE TABLE detalle_orden (
-    id_detalle INT AUTO_INCREMENT PRIMARY KEY,
-    id_orden INT,
-    id_servicio INT,
-    cantidad INT NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (id_orden) REFERENCES ordenes(id_orden) ON DELETE CASCADE,
-    FOREIGN KEY (id_servicio) REFERENCES servicios(id_servicio)
-) ENGINE=InnoDB;
-
-```
+* **Mappers:** Convierten datos brutos (JSON de Firestore o filas de SQL) en Entidades de dominio.
+* **Repositories (Implementations):** Aquí se decide si los datos vienen de la nube (Firebase) o de la base de datos local (SQLite).
 
 ---
 
-## 4. 📐 Arquitectura del Software (Flutter)
+## 2. 🏛️ Diseño de Base de Datos Profesional (DBA Vision)
 
-Para escalar sin errores, utilizaremos **Clean Architecture** organizada por **Features**.
+El sistema requiere una **trazabilidad quirúrgica**. Cada movimiento de una prenda debe quedar registrado en un modelo relacional normalizado.
 
-* **Data Layer:** Repositorios y fuentes de datos (Firebase/SQL).
-* **Domain Layer:** Entidades de negocio y casos de uso (Usecases).
-* **Presentation Layer:** Widgets de Flutter y **Providers de Riverpod**.
+### Esquema Detallado de Tablas
 
-**Estructura de carpetas:**
-
-```text
-lib/
-├── src/
-│   ├── features/
-│   │   ├── auth/          # Login/Registro
-│   │   ├── catalog/       # Selección de servicios
-│   │   ├── orders/        # Seguimiento y carrito
-│   │   └── payments/      # Pasarela de pagos
-│   ├── core/              # Temas, Router, Errores
-│   └── shared/            # Widgets comunes
-└── main.dart
-
-```
+1. **Catálogo:** `services` (precios, descripción) y `categories` (Ropa de Cama, Tintorería).
+2. **Operación:** `orders` (registro maestro), `order_items` (desglose de piezas) y `order_status_history` (log cronológico para auditoría).
+3. **Finanzas:** `payments` (id_orden, monto, método de pago, referencia de transacción).
 
 ---
 
-## 5. 📦 Dependencias Seleccionadas (Sin Provider)
+## 3. 🚀 Gestión de Estado con Riverpod (Modern Way)
 
-* **`flutter_riverpod`**: Gestión de estado global.
-* **`riverpod_annotation`**: Generación de código para estados más limpios.
-* **`cloud_firestore`**: Base de datos en tiempo real para estados de pedidos.
-* **`firebase_auth`**: Seguridad y perfiles.
-* **`sqflite`**: Base de datos relacional local.
-* **`go_router`**: Navegación avanzada.
-* **`freezed_annotation`**: Modelos de datos inmutables.
+Sustituimos definitivamente `provider` por **Riverpod con Code Generation** para seguridad de tipos en tiempo de compilación.
+
+* **`AuthNotifier`:** Gestiona el estado de autenticación. Si el usuario cierra sesión, todos los demás providers se reinician.
+* **`CartProvider`:** Un `Notifier` especializado en cálculos. Maneja una lista de `CartItem` y expone el `totalAmount`.
+* **`OrderTrackingProvider`:** Un `StreamProvider` suscrito a Firestore. Actualiza la App del cliente en tiempo real cuando el staff cambia el estado en el local.
 
 ---
 
-## 6. ✅ Recomendaciones de Implementación
+## 4. 🎨 Diseño de Experiencia de Usuario (UI/UX)
 
-* **Sincronización:** Usa Firestore para el rastreo en vivo de la ropa y una base de datos SQL para los cierres de caja y auditoría.
-* **Precios:** Siempre usa `Decimal` o convierte a centavos (`int`) en el código para evitar los errores de redondeo de los `double`.
-* **UX:** Implementa un sistema de "historial de fotos" en el detalle de la orden para que el cliente vea el estado en que se recibió su prenda.
+Estética **"Fresh & Clean"**:
+
+* **Paleta:** Azul Glaciar (#E1F5FE) para fondos, Azul Cobalto (#1976D2) para acciones primarias.
+* **Pantalla de Tracking:** Implementación de un Stepper dinámico: *Recogido → En Lavado → Secado → Planchado → Listo*.
 
 ---
 
-## 7. 🤖 Prompt para Antigravity (Versión Riverpod)
+## 5. 🛠️ Pasos Detallados para la Implementación (Workflow de Ingeniería)
 
-"Genera el código base para una App de Lavandería en Flutter utilizando **Riverpod** para la gestión de estado.
+Para que Antigravity genere el código correctamente, seguiremos estos pasos secuenciales:
 
-**Requerimientos:**
+### Paso 1: Configuración del Core y Dependencias
 
-1. **Modelos:** Crea clases inmutables para 'Cliente', 'Orden' y 'Servicio'.
-2. **Estado:** Implementa un `AsyncNotifier` de Riverpod para manejar el flujo de una orden (Desde selección de servicios hasta pago).
-3. **UI:** Diseña una pantalla de tracking con un Stepper que consuma un `StreamProvider` de Firebase Firestore.
-4. **Base de Datos:** Proporciona un script SQL compatible con MySQL que incluya tablas normalizadas para Clientes, Servicios, Órdenes, Detalle_Orden y Pagos.
-5. **Arquitectura:** Sigue el patrón Feature-First. No utilices Provider, utiliza Riverpod con generación de código."
+* Inicializar el proyecto Flutter.
+* Configurar el `pubspec.yaml` con: `flutter_riverpod`, `riverpod_annotation`, `freezed`, `go_router`, `cloud_firestore`, `sqflite`.
+* Establecer la estructura de carpetas `lib/src/features/`.
+
+### Paso 2: Implementación de la Capa de Datos (Data Layer)
+
+* Crear los modelos de datos inmutables con **Freezed**.
+* Configurar los `DataSources`: uno para **Firebase** (pedidos activos) y otro para **SQLite** (historial y caché).
+* Escribir el script SQL DDL para la base de datos local.
+
+### Paso 3: Lógica de Dominio y Casos de Uso
+
+* Definir las entidades puras de Dart.
+* Crear los repositorios abstractos (Interfaces).
+* Implementar lógica de negocio: cálculo de impuestos, validación de horarios de recogida y reglas de descuento por volumen.
+
+### Paso 4: Gestión de Estado con Riverpod Generator
+
+* Generar los providers de autenticación.
+* Crear el `CartNotifier` para manejar el estado complejo del carrito (añadir, quitar, incrementar cantidad).
+* Implementar el `StreamProvider` para el seguimiento en tiempo real.
+
+### Paso 5: Desarrollo de la UI Atómica
+
+* Diseñar widgets reutilizables: `LaundryPriceTag`, `StatusBadge`, `OrderSummaryCard`.
+* Construir la pantalla de catálogo con filtrado por categorías.
+* Desarrollar la pantalla de "Checkout" con integración visual de pasarela de pago.
+
+### Paso 6: Navegación y Guardias de Seguridad
+
+* Configurar **GoRouter** con rutas para: `/login`, `/dashboard`, `/order-details/:id`, `/payment`.
+* Implementar `redirect` para asegurar que usuarios no logueados siempre sean enviados a `/login`.
+
+### Paso 7: Pruebas y Aseguramiento de Calidad (QA)
+
+* Unit Testing de los UseCases (especialmente cálculos financieros).
+* Widget Testing de los componentes críticos.
+* Verificación de reglas de seguridad en Firestore.
+
+---
+
+## 📝 Prompt Definitivo para Antigravity (Copia y Pega)
+
+> **"Genera el sistema completo para la aplicación 'Lavandería Pro' utilizando Flutter. Sigue estrictamente estas especificaciones técnicas:**
+> **1. GESTIÓN DE ESTADO Y ARQUITECTURA:**
+> * **PROHIBIDO USAR PROVIDER.** Implementa **Riverpod** utilizando `riverpod_generator`.
+> * Aplica **Clean Architecture** con estructura de carpetas **Feature-First**.
+> * Utiliza **Freezed** para todos los modelos de datos y estados.
+> 
+> 
+> **2. MODELADO DE DATOS:**
+> * Genera un script SQL DDL normalizado (Tablas: Clientes, Servicios, Órdenes, Detalle, Pagos).
+> * Implementa sincronización: Pedidos activos en **Firestore**, historial en **SQLite**.
+> 
+> 
+> **3. FUNCIONALIDADES ESPECÍFICAS:**
+> * **Cart Logic:** Notifier que gestione ítems, calcule IVA y costo de envío.
+> * **Order Tracking:** Pantalla con Stepper visual consumiendo un Stream en tiempo real.
+> * **Auth:** Login con Firebase Auth y persistencia con GoRouter.
+> 
+> 
+> **4. INTERFAZ (UI/UX):**
+> * Estilo: Limpio, minimalista, paleta azul y blanco.
+> * Genera componentes: `LaundryServiceCard`, `OrderStepIndicator`, `PriceSummary`.
+> 
+> 
+> **5. ENTREGABLES:**
+> * Código fuente completo por capas.
+> * Script SQL DDL.
+> * Archivo pubspec.yaml completo."
+> 
+>
