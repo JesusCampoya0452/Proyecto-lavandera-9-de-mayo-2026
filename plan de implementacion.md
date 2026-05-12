@@ -1,156 +1,100 @@
-# 📋 Plan de Implementación: Aplicación "Clínica Veterinaria" (Flutter + Firebase)
+El plan original es una base sólida, pero tiene una inconsistencia crítica: el título menciona una aplicación de **"Lavandería"**, mientras que el contenido describe una aplicación de **"Veterinaria"** (mascotas, citas clínicas, veterinarios).
 
-> ⚠️ **Nota sobre IDEs:** `VS Code` es ampliamente soportado y recomendado para Flutter. `Antigravity` no es un IDE reconocido para desarrollo Flutter; si te refieres a otra herramienta, se recomienda usar **VS Code** o **Android Studio** por su integración nativa con el ecosistema Flutter/Dart.
+A continuación, presento una versión mejorada y corregida, unificando el concepto hacia una **Lavandería profesional**, optimizando la arquitectura y añadiendo capas de seguridad y escalabilidad que faltaban.
 
 ---
 
-## 1. 🛠️ Herramientas y Entorno de Desarrollo
+# 🚀 Plan de Implementación Optimizado: App "Lavandería Pro" (Flutter + Firebase)
+
+## 1. 🛠️ Ecosistema Técnico y Herramientas
+
+Se mantiene **VS Code** como estándar, pero se añaden herramientas de productividad clave.
+
 | Categoría | Herramienta | Propósito |
-|-----------|-------------|-----------|
-| **SDK** | Flutter SDK + Dart SDK | Framework base y lenguaje |
-| **IDE** | VS Code | Editor principal con extensiones oficiales |
-| **Extensiones VS Code** | Flutter, Dart, Pubspec Assist, Error Lens, Firebase Explorer | Autocompletado, diagnóstico, gestión de paquetes y Firebase |
-| **Control de Versiones** | Git + GitHub/GitLab | Historial, ramas y colaboración |
-| **CLI** | Firebase CLI, Flutter CLI | Inicialización, despliegue y emulación |
-| **Emulación/Pruebas** | Android Emulator / iOS Simulator / Dispositivo físico | Pruebas multiplataforma |
-| **Diseño** | Figma / Adobe XD | Prototipado y handoff de UI/UX |
+| --- | --- | --- |
+| **IDE** | VS Code / Android Studio | Desarrollo principal. |
+| **State Management** | **Riverpod** (Recomendado) o Provider | Riverpod ofrece mayor seguridad de tipado y facilidad de pruebas que Provider. |
+| **Local DB** | Hive o Isar | Para persistencia offline rápida (catálogo de servicios). |
+| **Backend** | Firebase Suite | Auth, Firestore, Cloud Functions (para pagos/notificaciones). |
+| **Pagos** | Stripe / Mercado Pago SDK | Esencial para una app de servicios de lavandería. |
 
 ---
 
-## 2. 🎨 Estrategia de UI/UX
-1. **Investigación de Usuarios:** Definir perfiles (Veterinario, Recepcionista, Dueño de mascota) y sus flujos principales.
-2. **Arquitectura de Información:** Mapa de pantallas (`Login → Dashboard → Gestión de Mascotas → Citas → Historial Clínico → Configuración`).
-3. **Sistema de Diseño:**
-   - Paleta: tonos verdes/azules (confianza, salud), acentos cálidos para alertas.
-   - Tipografía: sans-serif legible (`Inter`, `Roboto` o `SF Pro`).
-   - Componentes reutilizables: tarjetas de mascotas, formularios de citas, listas de historial, botones de acción primaria/secundaria.
-4. **Principios UX:**
-   - Navegación inferior o lateral según plataforma.
-   - Estados de carga y vacío explícitos.
-   - Validación en tiempo real y mensajes de error claros.
-   - Accesibilidad: contraste AA, tamaños de texto dinámicos, etiquetado semántico.
+## 2. 🎨 Estrategia de UI/UX (Enfocada a Servicios)
+
+1. **Flujos de Usuario:**
+* **Cliente:** Registro → Selección de servicios (lavado, secado, planchado) → Agendado/Recogida → Pago → Seguimiento en tiempo real.
+* **Repartidor/Staff:** Órdenes pendientes → Cambio de estado (En lavado, Listo, Entregando) → Confirmación de entrega.
+
+
+2. **Mapa de Pantallas:** `Onboarding → Auth → Catálogo → Carrito → Checkout → Mis Pedidos → Perfil`.
+3. **Diseño Visual:**
+* **Paleta:** Azul cian y blanco (limpieza), naranja (acción/rapidez).
+* **Componentes:** Steppers de progreso (para ver el estado de la ropa), selectores de cantidad, y resúmenes de costos.
+
+
 
 ---
 
-## 3. 📦 Inventario de Dependencias (`pubspec.yaml`)
-*(Listado conceptual listo para incluir en `pubspec.yaml` sin bloques de código)*
+## 3. 📦 Arquitectura y Modelado de Datos (Firestore)
 
-- `firebase_core` → Inicialización del SDK de Firebase.
-- `firebase_auth` → Autenticación por correo/contraseña y gestión de sesión.
-- `cloud_firestore` → Operaciones CRUD y consultas en tiempo real.
-- `provider` → Gestión de estado (ChangeNotifier, MultiProvider).
-- `go_router` → Enrutamiento declarativo y protección de rutas.
-- `google_fonts` → Tipografías personalizadas sin assets locales.
-- `intl` → Formateo de fechas, horas y monedas según locale.
-- `cached_network_image` → Carga y caché de imágenes (fotos de mascotas/logos).
-- `uuid` → Generación de identificadores únicos para documentos offline.
-- `formz` o `equatable` → Validación de formularios y comparación de estados.
-- `flutter_svg` → Renderizado de iconos/vectoriales escalables.
-- `firebase_crashlytics` + `firebase_analytics` → Monitoreo de errores y métricas de uso.
+Para que la app sea escalable, el modelo de datos debe ser robusto.
+
+### Estructura de Colecciones:
+
+* **`users`**: `{uid, nombre, direccion_principal, telefono, rol: 'cliente'|'admin'}`
+* **`services`**: `{id, nombre, precio_por_kg, tiempo_estimado, categoria}`
+* **`orders`**: `{id, clienteId, items: [], total, estado: 'pendiente'|'lavando'|'listo', fecha_recogida, coordenadas_gps}`
+* **`coupons`**: `{codigo, descuento, validez}`
 
 ---
 
-## 4. 🔑 Configuración de Firebase
-1. Crear proyecto en Firebase Console.
-2. Registrar apps Android e iOS (descargar `google-services.json` y `GoogleService-Info.plist`).
-3. Habilitar **Authentication → Correo electrónico/contraseña**.
-4. Crear base de datos **Firestore** en modo prueba (luego endurecer reglas).
-5. (Opcional) Habilitar **Storage** para adjuntos clínicos o fotos.
-6. Configurar reglas de seguridad progresivas por rol y autenticación.
-7. Verificar integración ejecutando `flutterfire configure`.
+## 4. 🔑 Configuración de Seguridad y Lógica
+
+No basta con conectar Firebase; hay que proteger los datos:
+
+1. **Reglas de Firestore:** Restringir que los clientes solo lean/editen sus propios pedidos. Solo el administrador puede editar el catálogo de precios.
+2. **Firebase Cloud Functions:** Utilizarlas para:
+* Procesar pagos de forma segura (Server-side).
+* Enviar notificaciones Push cuando el pedido cambie de estado.
+* Generar facturas en PDF automáticamente al finalizar el servicio.
+
+
 
 ---
 
-## 5. 📐 Arquitectura y Gestión de Estado (Provider)
-- **Patrón recomendado:** Feature-First + Clean-ish Structure.
-- **Estructura de carpetas:**
-  ```
-  lib/
-    ├── main.dart
-    ├── core/ (config, theme, utils, constants)
-    ├── data/ (models, repositories, services)
-    ├── features/ (auth, dashboard, pets, appointments, profile)
-    ├── shared/ (widgets, components, dialogs)
-    └── providers/ (global state, theme, user session)
-  ```
-- **Provider:**
-  - `AuthProvider`: gestiona sesión, roles y redirección post-login.
-  - `FirestoreProvider`: abstrae llamadas a colecciones (`users`, `pets`, `appointments`, `clinical_records`).
-  - `UIProvider`: estado de carga, selección de filtros, notificaciones locales.
-  - Uso de `MultiProvider` en el widget raíz para inyección global.
-  - Separación clara entre estado de UI y estado de datos.
+## 5. 🚀 Plan de Desarrollo por Sprints (8 Semanas)
+
+### 🔹 Semana 1-2: Core & Auth
+
+* Setup de entorno y Clean Architecture (Capas: UI, Domain, Data).
+* Auth con Firebase (Google & Email).
+* Perfil de usuario con validación de dirección (Google Places API).
+
+### 🔹 Semana 3-4: Catálogo y Carrito
+
+* Implementación de `FirestoreProvider` para traer servicios en tiempo real.
+* Lógica de carrito local (uso de **Riverpod** para manejar el estado global de la orden).
+* Cálculo automático de impuestos y costos de envío.
+
+### 🔹 Semana 5-6: Checkout y Estados de Orden
+
+* Integración de pasarela de pagos.
+* Flujo de pedidos: Creación del documento en Firestore y cambio de estados.
+* Pantalla de seguimiento con un **Stepper UI** para que el usuario vea dónde está su ropa.
+
+### 🔹 Semana 7-8: Pulido y Despliegue
+
+* Manejo de errores con `Error Lens` y diálogos amigables.
+* Pruebas de estrés en reglas de seguridad.
+* Generación de Bundle para Android (.aab) e iOS.
 
 ---
 
-## 6. 🚀 Plan Paso a Paso de Desarrollo
+## 7. ✅ Recomendaciones de Mejora (El "Plus")
 
-### 🔹 Fase 1: Configuración Inicial del Proyecto
-1. Inicializar proyecto Flutter con soporte Android/iOS/Web.
-2. Configurar estructura de carpetas según arquitectura definida.
-3. Integrar Firebase mediante CLI y verificar conexión.
-4. Configurar `go_router` con rutas base y redirección por defecto.
-5. Definir tema global (colores, tipografía, espaciados, radio de bordes).
+* **Modo Offline:** Permite que el usuario vea sus pedidos anteriores aunque no tenga internet usando la persistencia de Firestore.
+* **Deep Linking:** Permite que, si envías una promoción por WhatsApp, el usuario abra la app directamente en el descuento.
+* **Geofencing:** Notificar al staff de la lavandería automáticamente cuando el repartidor está cerca del local.
 
-### 🔹 Fase 2: Autenticación (Email/Password)
-1. Implementar pantalla de Login con validación de campos.
-2. Conectar `firebase_auth` para registro, inicio de sesión y recuperación de contraseña.
-3. Crear `AuthProvider` con `ChangeNotifier` para exponer estado de sesión.
-4. Implementar protección de rutas: usuarios no autenticados → Login, autenticados → Dashboard.
-5. Añadir cierre de sesión y limpieza de estado persistente.
-
-### 🔹 Fase 3: Modelo de Datos y Firestore
-1. Definir documentos y colecciones:
-   - `users`: id, email, nombre, rol, teléfono, createdAt.
-   - `pets`: id, ownerId, nombre, especie, raza, edad, peso, fotoUrl, historialRef.
-   - `appointments`: id, petId, vetId, fecha, hora, estado, notas.
-   - `clinical_records`: id, petId, fecha, diagnóstico, tratamiento, adjuntos.
-2. Crear modelos Dart inmutables con métodos `toJson`/`fromJson`.
-3. Implementar repositorios que abstraigan Firestore (create, read, update, delete, streams).
-4. Configurar índices compuestos para consultas frecuentes (ej: citas por fecha + estado).
-
-### 🔹 Fase 4: Integración de Provider y Estado Reactivo
-1. Inicializar `MultiProvider` en `main.dart` con `AuthProvider`, `FirestoreProvider`, `ThemeProvider`.
-2. Envolver pantallas sensibles con `Consumer` o `Provider.of` según necesidad.
-3. Implementar estados de carga (`isLoading`, `error`, `empty`, `success`) en cada provider.
-4. Asegurar que las actualizaciones de Firestore propaguen cambios a la UI en tiempo real.
-5. Centralizar manejo de errores y notificaciones de feedback al usuario.
-
-### 🔹 Fase 5: Desarrollo de Pantallas y Navegación
-1. Construir componentes reutilizables (cards, formularios, list tiles, botones).
-2. Implementar Dashboard con resumen de citas del día, mascotas recientes y alertas.
-3. Desarrollar flujo de gestión de mascotas: listado, detalle, edición, eliminación lógica.
-4. Implementar agenda de citas: creación, edición, cambio de estado, recordatorios visuales.
-5. Conectar navegación profunda y transiciones suaves entre pantallas.
-6. Validar responsividad en tablet/móvil/desktop.
-
-### 🔹 Fase 6: Seguridad, Reglas y Optimización
-1. Escribir reglas de Firestore por colección (solo lectura/escritura según rol y ownership).
-2. Implementar validación de formularios antes de enviar a Firestore.
-3. Añadir paginación o `limit` en listas largas para rendimiento.
-4. Optimizar imágenes con compresión y caché.
-5. Configurar Crashlytics y Analytics para monitoreo post-lanzamiento.
-
-### 🔹 Fase 7: Pruebas y QA
-1. Pruebas unitarias de repositorios y providers.
-2. Pruebas de widget para componentes críticos.
-3. Pruebas de integración de flujos completos (login → crear cita → guardar → verificar en Firestore).
-4. Pruebas en múltiples plataformas y tamaños de pantalla.
-5. Verificación de reglas de seguridad con emuladores de Firebase.
-
-### 🔹 Fase 8: Despliegue y Mantenimiento
-1. Generar builds de producción (`flutter build apk/ipa/web`).
-2. Configurar firmas digitales y metadatos para stores.
-3. Publicar en Play Store, App Store y/o web hosting.
-4. Establecer pipeline CI/CD básico (GitHub Actions opcional).
-5. Plan de actualizaciones: monitoreo de feedback, parches de seguridad, nuevas funcionalidades.
-
----
-
-## 7. ✅ Recomendaciones Finales
-- **Control de versiones:** Usa ramas por feature (`feat/auth`, `feat/pets`, `fix/firestore-rules`).
-- **Documentación:** Mantén un `README.md` con instrucciones de setup, arquitectura y flujos.
-- **Privacidad:** Cumple con GDPR/Ley de protección de datos si almacenas información de clientes.
-- **Escalabilidad:** Diseña los repositorios para facilitar migración futura a Clean Architecture completa si el proyecto crece.
-- **No hardcodees:** Usa `flutter_dotenv` o `--dart-define` para URLs, claves y entornos.
-
-Este plan está estructurado para ejecutarse de forma iterativa y predecible. Si deseas profundizar en alguna fase (ej: modelado de datos, estrategia de navegación, o reglas de seguridad), puedo generar un desglose técnico detallado sin incluir código.
+¿Te gustaría que profundizara en la estructura de una **Cloud Function** para gestionar los pagos o prefieres ver cómo organizar las carpetas bajo el patrón **Feature-First**?
