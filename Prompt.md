@@ -1,49 +1,52 @@
-Entiendo que deseas llevar este plan al siguiente nivel utilizando **Antigravity** (herramienta de diseño/generación basada en IA). Para que la herramienta interprete correctamente la complejidad de una App de Lavandería con una base de datos relacional, el prompt debe ser técnico, estructural y visualmente descriptivo.
+Perfecto. He ajustado el prompt para **Antigravity** eliminando cualquier rastro de `Provider` y sustituyéndolo por un enfoque moderno basado en **Riverpod** con generación de código (`Riverpod Generator`), que es el estándar actual para proyectos de alto rendimiento en Flutter.
 
-Aquí tienes el prompt optimizado para generar el prototipo o la estructura inicial en Antigravity:
+Aquí tienes el prompt definitivo para que lo copies y pegues:
 
 ---
 
-### 🚀 Prompt para Antigravity: App "Lavandería Pro"
+### 🚀 Prompt para Antigravity: App "Lavandería Pro" (Full Riverpod & SQL)
 
 **System Context:**
 
-> "Actúa como un Senior Fullstack Developer y Diseñador de UX/UI. El objetivo es crear el blueprint técnico y visual de una aplicación de lavandería profesional llamada 'Lavandería Pro'."
+> "Actúa como un Arquitecto de Software experto en Flutter y DBA. El objetivo es generar el andamiaje técnico de una aplicación de lavandería profesional que utilice Riverpod para el estado y una estructura relacional para los datos."
 
 **Prompt Principal:**
-"Genera la estructura completa para una aplicación móvil en **Flutter** conectada a **Firebase**, diseñada específicamente para la gestión de servicios de lavandería. La arquitectura debe basarse en los siguientes pilares:
 
-**1. Arquitectura de Base de Datos (Relacional):**
-Diseña un esquema de datos optimizado que incluya las entidades:
+"Genera la estructura técnica y visual para una aplicación de lavandería en **Flutter** eliminando por completo el uso de Provider y utilizando **Riverpod (con riverpod_generator)** como única solución de gestión de estado.
 
-* **CLIENTES:** (id, nombre, email, teléfono, dirección_geo).
-* **SERVICIOS:** (id, nombre_servicio, precio_decimal, unidad_medida).
-* **ORDENES:** (id, id_cliente, fecha_ingreso, fecha_entrega, estado_enum: [Recibido, Lavando, Planchado, Listo, Entregado]).
-* **PAGOS:** (id, id_orden, monto_decimal, metodo_pago).
+**1. Arquitectura de Datos (Enfoque Relacional):**
+Diseña un esquema de base de datos SQL normalizado y escalable que incluya las siguientes entidades con integridad referencial:
 
-**2. Interfaz de Usuario (UX/UI):**
+* **CLIENTE:** (id, nombre, email, direccion_entrega).
+* **SERVICIO:** (id, nombre, precio_decimal, categoria_enum).
+* **ORDEN:** (id, id_cliente, fecha_creacion, estado_actual_enum).
+* **DETALLE_ORDEN:** (id, id_orden, id_servicio, cantidad, subtotal_decimal).
+* **PAGO:** (id, id_orden, monto_decimal, metodo_pago_enum).
+*(Genera el script SQL DDL compatible con MySQL/PostgreSQL usando tipos DECIMAL para montos monetarios).*
 
-* **Estilo Visual:** Limpio, minimalista, con una paleta de colores basada en Azul Cian (#00BCD4) y Blanco Puro para transmitir limpieza.
-* **Pantalla Principal:** Un Dashboard que muestre un 'Stepper' vertical u horizontal con el progreso en tiempo real de la orden activa del usuario.
-* **Catálogo:** Una lista de tarjetas interactivas para seleccionar servicios (Lavado por KG, Tintorería, Planchado).
+**2. Gestión de Estado con Riverpod:**
 
-**3. Flujo Lógico y Funcionalidades:**
+* Crea un `AsyncNotifierProvider` para gestionar el estado de las órdenes en tiempo real.
+* Implementa un `StreamProvider` para escuchar los cambios de estado de la lavandería desde Firebase Firestore.
+* Crea un `StateProvider` para el manejo del carrito de servicios antes de confirmar el pedido.
+* Asegura que no exista ninguna dependencia de 'provider' en el archivo `pubspec.yaml` ni en los archivos `.dart`.
 
-* Implementación de **State Management** (Riverpod o Provider).
-* Integración de un carrito de compras dinámico que calcule subtotales y taxes automáticamente.
-* Sistema de notificaciones push para cambios de estado de la orden.
-* Generación de tickets digitales en formato PDF.
+**3. Interfaz de Usuario (UI):**
 
-**4. Entregables Técnicos:**
+* **Diseño:** Estilo minimalista con enfoque en accesibilidad.
+* **Componentes:** Un 'ServiceSelector' con cards modernas, un 'OrderStepper' para visualizar el progreso del lavado y un 'PaymentSummary'.
+* **Navegación:** Configura **GoRouter** para manejar rutas protegidas (Login/Dashboard).
 
-* Genera el código estructurado por capas (Data, Domain, Presentation).
-* Crea el script SQL DDL compatible con MySQL para la base de datos de respaldo.
-* Define las reglas de seguridad de Firebase Firestore para proteger los datos de los clientes."
+**4. Entregables de Código:**
+
+* Modelos de datos inmutables usando la sintaxis de **Freezed**.
+* Estructura de carpetas bajo el patrón **Feature-First** (auth, services, orders, payment).
+* Lógica de validación para formularios de recogida y entrega."
 
 ---
 
-### 💡 Consejos adicionales para usar en Antigravity:
+### 💡 Por qué este prompt es mejor:
 
-* **Si quieres el código:** Añade al final del prompt: *"Proporciona los archivos `main.dart`, `order_model.dart` y el script `.sql` por separado."*
-* **Si buscas el diseño visual:** Añade: *"Genera un mapa de navegación (Wireframe) que conecte el Login con el Tracking de la orden."*
-* **Para la base de datos:** Asegúrate de enfatizar el uso de `DECIMAL` para los precios, ya que las IAs a veces omiten esto y usan `double`, lo cual genera errores contables.
+1. **Eliminación estricta de Provider:** Al especificar `riverpod_generator`, obligas a la IA a usar la sintaxis más moderna de Riverpod (clases con la anotación `@riverpod`), evitando patrones obsoletos.
+2. **Precisión Financiera:** Al insistir en `DECIMAL` y `monto_decimal`, evitas que Antigravity use `double`, lo que previene errores de precisión en los cobros de la lavandería.
+3. **Clean Architecture:** Al pedir el patrón **Feature-First**, el código que genere será fácil de navegar y escalar si decides añadir funciones como "lavado de alfombras" o "suscripciones mensuales" después.
