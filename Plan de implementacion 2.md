@@ -70,47 +70,53 @@ lib/
 ## 3. Fases de Ejecución del Proyecto
   Para materializar este Plan Maestro, se establecen las siguientes etapas cronológicas:
   
-  Fase I: Cimentación e Infraestructura Cloud
-  Configuración de Environments: Creación de proyectos en Firebase (Dev/Prod) y vinculación de Apps Android/iOS/Web.
+  ### Fase I: 
+    Cimentación e Infraestructura Cloud
+    Configuración de Environments: Creación de proyectos en Firebase (Dev/Prod) y vinculación de Apps Android/iOS/Web.
+    
+    Implementación del Core: Estructuración de la carpeta lib/src/core, configuración del ThemeData y el sistema de rutas con GoRouter.
+    
+    Despliegue de DB Inicial: Creación de las colecciones en Firestore basadas en las entidades de SUCURSAL, SERVICIO e INSUMO.
   
-  Implementación del Core: Estructuración de la carpeta lib/src/core, configuración del ThemeData y el sistema de rutas con GoRouter.
+  ### Fase II: 
+    Gestión de Identidad y Acceso (Auth)
+    Lógica de Autenticación: Desarrollo del auth_provider.dart y repositorios de FirebaseAuth.
+    
+    Perfiles: Creación de documentos en la colección CLIENTE y EMPLEADO al momento del registro.
+    
+    Seguridad: Implementación de las primeras Security Rules para que solo el staff acceda al Panel Web.
   
-  Despliegue de DB Inicial: Creación de las colecciones en Firestore basadas en las entidades de SUCURSAL, SERVICIO e INSUMO.
+  ### Fase III: 
+    Catálogo Reactivo y Gestión de Estados (Provider)
+    Data Sourcing: Conexión de laundry_catalog con Firestore mediante Streams.
+    
+    Lógica de Carrito: Desarrollo del cart_provider.dart para manejar la selección de prendas y servicios en tiempo real.
+    
+    Modelado: Implementación de las entidades de dominio para PRENDA_ORDEN y lógica de cálculo de precios base.
   
-  Fase II: Gestión de Identidad y Acceso (Auth)
-  Lógica de Autenticación: Desarrollo del auth_provider.dart y repositorios de FirebaseAuth.
+  ### Fase IV: 
+    Operativa Web y Kanban Tower
+    Dashboard Administrativo: Construcción de la UI del admin_web_panel.
+    
+    Motor Kanban: Implementación del sistema de columnas reactivas que escuchan la colección ORDEN.
+    
+    Módulo Operativo: CRUD de INSUMOS y PROVEEDORES para el control de inventario desde la web.
   
-  Perfiles: Creación de documentos en la colección CLIENTE y EMPLEADO al momento del registro.
-  
-  Seguridad: Implementación de las primeras Security Rules para que solo el staff acceda al Panel Web.
-  
-  Fase III: Catálogo Reactivo y Gestión de Estados (Provider)
-  Data Sourcing: Conexión de laundry_catalog con Firestore mediante Streams.
-  
-  Lógica de Carrito: Desarrollo del cart_provider.dart para manejar la selección de prendas y servicios en tiempo real.
-  
-  Modelado: Implementación de las entidades de dominio para PRENDA_ORDEN y lógica de cálculo de precios base.
-  
-  Fase IV: Operativa Web y Kanban Tower
-  Dashboard Administrativo: Construcción de la UI del admin_web_panel.
-  
-  Motor Kanban: Implementación del sistema de columnas reactivas que escuchan la colección ORDEN.
-  
-  Módulo Operativo: CRUD de INSUMOS y PROVEEDORES para el control de inventario desde la web.
-  
-  Fase V: Logística, Pagos y Notificaciones
-  Flujo de Pago: Integración de la entidad PAGO y cierre de la ORDEN.
-  
-  Tracking Step-by-Step: Desarrollo del order_tracking en móvil que reacciona a los movimientos de tarjetas en el Kanban Web.
-  
-  Cloud Messaging: Configuración de alertas automáticas para cambios de estado (ej: "Tu ropa está lista").
-  
-  Fase VI: Refinamiento, QA y Lanzamiento
-  Optimización de Activos: Configuración de Storage para fotos de control de calidad.
-  
-  Pruebas de Integridad: Validación de reglas de negocio (evitar saltos de estado inválidos).
-  
-  Producción: Compilación final y despliegue en Stores y Web Hosting.
+  ### Fase V: 
+    Logística, Pagos y Notificaciones
+    Flujo de Pago: Integración de la entidad PAGO y cierre de la ORDEN.
+    
+    Tracking Step-by-Step: Desarrollo del order_tracking en móvil que reacciona a los movimientos de tarjetas en el Kanban Web.
+    
+    Cloud Messaging: Configuración de alertas automáticas para cambios de estado (ej: "Tu ropa está lista").
+    
+  ### Fase VI: 
+    Refinamiento, QA y Lanzamiento
+    Optimización de Activos: Configuración de Storage para fotos de control de calidad.
+    
+    Pruebas de Integridad: Validación de reglas de negocio (evitar saltos de estado inválidos).
+    
+    Producción: Compilación final y despliegue en Stores y Web Hosting.
 
 ## 📊 4. Arquitectura de Datos Detallada (Estructura de Tablas)
 
