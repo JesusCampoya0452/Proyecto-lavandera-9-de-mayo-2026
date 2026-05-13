@@ -67,6 +67,48 @@ lib/
 
 ---
 
+## 📦 2.5 Configuración de Dependencias Críticas (Estructura pubspec)
+  Para dar soporte a la arquitectura reactiva y multientorno descrita, el sistema requiere la integración de las siguientes librerías oficiales y de la comunidad:
+  
+  Gestión de Estado y Lógica:
+  
+  provider: El motor principal para el manejo de ChangeNotifiers y la inyección de dependencias en todo el árbol de widgets.
+  
+  Infraestructura Firebase (Backend as a Service):
+  
+  firebase_core: Requisito base para la vinculación de los servicios de Google.
+  
+  firebase_auth: Gestión de sesiones, tokens JWT y seguridad de identidad.
+  
+  cloud_firestore: Implementación de los Streams reactivos para la base de datos NoSQL con soporte relacional.
+  
+  firebase_storage: Repositorio para el almacenamiento de evidencias fotográficas de control de calidad.
+  
+  firebase_messaging: Sistema de alertas push para cambios en el estado de las órdenes.
+  
+  Navegación y Estructura:
+  
+  go_router: Motor para la navegación declarativa, esencial para el manejo de URLs en la versión Web Administrativa y rutas profundas en móvil.
+  
+  Utilidades de Datos y UI:
+  
+  intl: Herramienta indispensable para el formateo de moneda (pesos/dólares) y fechas de entrega de pedidos.
+  
+  google_fonts: Implementación del sistema tipográfico definido en el Design System.
+  
+  cached_network_image: Optimización de memoria para el catálogo de prendas, evitando descargas redundantes.
+  
+  shimmer: Generación de efectos de carga elegantes para una percepción de mayor velocidad.
+  
+  lottie: Soporte para animaciones vectoriales en los estados de "Ropa Lavándose" y "Pedido Entregado".
+  
+  Logística y Localización:
+  
+  google_maps_flutter: Visualización de la ruta del repartidor en el módulo de tracking.
+  
+  geolocator: Obtención de coordenadas precisas para la logística de recogida y entrega a domicilio.
+
+
 ## 3. Fases de Ejecución del Proyecto
   Para materializar este Plan Maestro, se establecen las siguientes etapas cronológicas:
   
